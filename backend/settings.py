@@ -80,3 +80,45 @@ USE_TZ = True
 STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Models
+from django.db import models
+
+class StudentRecord(models.Model):
+    student_id = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=255)
+    course = models.CharField(max_length=255)
+    grade = models.CharField(max_length=5)
+    instructor = models.CharField(max_length=255)
+    year_completed = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.name} - {self.course} ({self.year_completed})"
+
+# Serializers
+from rest_framework import serializers
+
+class StudentRecordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentRecord
+        fields = '__all__'
+
+# Views
+from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
+
+class StudentRecordViewSet(viewsets.ModelViewSet):
+    queryset = StudentRecord.objects.all()
+    serializer_class = StudentRecordSerializer
+    permission_classes = [AllowAny]
+
+# URLs
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register(r'student-records', StudentRecordViewSet)
+
+urlpatterns = [
+    path('api/', include(router.urls)),
+]
